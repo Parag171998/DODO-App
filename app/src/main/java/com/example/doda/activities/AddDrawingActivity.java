@@ -106,6 +106,7 @@ public class AddDrawingActivity extends AppCompatActivity {
 		Time time = new Time(date.getTime());
 		currentTime = time.toString();
 
+		pinView.setMinimumDpi(100);
 		pinView.setMaxScale(10f);
 		pinView.setPins(mapPinArrayList);
 		final GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
@@ -256,7 +257,7 @@ public class AddDrawingActivity extends AppCompatActivity {
 
 	private byte[] getbytesFromBitmap() {
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+		bitmap.compress(Bitmap.CompressFormat.JPEG, 50, stream);
 		byte[] byteArray = stream.toByteArray();
 		bitmap.recycle();
 		return byteArray;
@@ -293,8 +294,13 @@ public class AddDrawingActivity extends AppCompatActivity {
 				mapPin.setDrawingId(drawingId);
 				mydao.addPins(mapPin);
 			}
-			Toast.makeText(context, "New Drawing Added", Toast.LENGTH_SHORT).show();
 			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void aVoid) {
+			super.onPostExecute(aVoid);
+			Toast.makeText(context, "New Drawing Added", Toast.LENGTH_SHORT).show();
 		}
 	}
 }
