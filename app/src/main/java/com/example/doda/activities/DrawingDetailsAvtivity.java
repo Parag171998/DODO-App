@@ -1,5 +1,7 @@
 package com.example.doda.activities;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -13,6 +15,9 @@ import android.view.MotionEvent;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.example.doda.R;
 import com.example.doda.Room.MyappDatabse;
@@ -58,13 +63,16 @@ public class DrawingDetailsAvtivity extends AppCompatActivity {
 	@SuppressLint({"ClickableViewAccessibility", "SetTextI18n"})
 	private void init(Intent intent) {
 		title.setText(intent.getStringExtra("title"));
-		byte[] bytes = intent.getByteArrayExtra("byteArray");
-
-		if(bytes != null) {
+		String url = intent.getStringExtra("imhUrl");
+		if(url != null) {
 			pinView.setMaxScale(10f);
-			Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-			pinView.setImage(ImageSource.bitmap(bitmap));
+			Glide.with(this).asBitmap().load(url).into(new SimpleTarget<Bitmap>() {
+				@Override
+				public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+					pinView.setImage(ImageSource.bitmap(resource));
 
+				}
+			});
 			date.setText("Created at: " + intent.getStringExtra("date"));
 			time.setText("Time: " + intent.getStringExtra("time"));
 			count.setText(count.getText() + String.valueOf(intent.getIntExtra("pinCount", -1)));

@@ -1,5 +1,7 @@
 package com.example.doda.activities;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,12 +10,10 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.PointF;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -22,6 +22,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.example.doda.R;
 import com.example.doda.Room.MyappDatabse;
@@ -30,8 +33,6 @@ import com.example.doda.model.Drawing;
 import com.example.doda.model.MapPin;
 import com.example.doda.util.PinView;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
@@ -63,10 +64,10 @@ public class AddDrawingActivity extends AppCompatActivity {
 	final ArrayList<MapPin> oldMapPinList = new ArrayList<>();
 	HashMap<List<Float>, Boolean> lastPinsIds = new HashMap<>();
 	float x = 0, y = 0;
-	Bitmap bitmap = null;
 	Drawing drawing;
 	boolean isEdit;
 	boolean isMarkerSaved = true;
+	String imgUrl = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -87,9 +88,13 @@ public class AddDrawingActivity extends AppCompatActivity {
 				if (drawing != null) {
 					mapPinArrayList.addAll(mydao.getPins((long) drawing.getId()));
 					oldMapPinList.addAll(mapPinArrayList);
-					bitmap = BitmapFactory.decodeByteArray(drawing.getBytes(), 0, drawing.getBytes().length);
-					pinView.setImage(ImageSource.bitmap(bitmap));
-
+					imgUrl = drawing.getImgUrl();
+					Glide.with(this).asBitmap().load(imgUrl).into(new SimpleTarget<Bitmap>() {
+						@Override
+						public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+							pinView.setImage(ImageSource.bitmap(resource));
+						}
+					});
 					pinView.setPins(mapPinArrayList);
 					title.setText(drawing.getName());
 				}
@@ -149,6 +154,7 @@ public class AddDrawingActivity extends AppCompatActivity {
 			pinView.setPins(mapPinArrayList);
 			x = 0;
 			y = 0;
+			isMarkerSaved = true;
 			dialogBuilder.dismiss();
 		});
 		btnSubmit.setOnClickListener(view -> {
@@ -189,15 +195,14 @@ public class AddDrawingActivity extends AppCompatActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == SELECT_IMAGE) {
 			if (resultCode == Activity.RESULT_OK) {
-				if (data != null) {
-
-					try {
-						bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-
-					pinView.setImage(ImageSource.bitmap(bitmap));
+				if (data != null && data.getData() != null) {
+					imgUrl = data.getData().toString();
+					Glide.with(this).asBitmap().load(imgUrl).into(new SimpleTarget<Bitmap>() {
+						@Override
+						public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+							pinView.setImage(ImageSource.bitmap(resource));
+						}
+					});
 					mapPinArrayList.clear();
 					pinView.setPin(null);
 				}
@@ -221,9 +226,9 @@ public class AddDrawingActivity extends AppCompatActivity {
 		if (checkValidity()) {
 			if (isMarkerSaved) {
 				if (!isEdit) {
-					new insertDrawing(AddDrawingActivity.this, mydao, getbytesFromBitmap(), title.getText().toString().trim(), currentDate, currentTime, mapPinArrayList).execute();
+					new insertDrawing(AddDrawingActivity.this, mydao, imgUrl, title.getText().toString().trim(), currentDate, currentTime, mapPinArrayList).execute();
 				} else {
-					drawing.setBytes(getbytesFromBitmap());
+					drawing.setImgUrl(imgUrl);
 					drawing.setName(title.getText().toString().trim());
 					drawing.setDate(currentDate);
 					drawing.setTime(currentTime);
@@ -245,7 +250,7 @@ public class AddDrawingActivity extends AppCompatActivity {
 	}
 
 	private boolean checkValidity() {
-		if (bitmap == null) {
+		if (imgUrl == null) {
 			Toast.makeText(this, "Please select the image", Toast.LENGTH_SHORT).show();
 			return false;
 		} else if (title.getText().toString().trim().isEmpty()) {
@@ -255,29 +260,21 @@ public class AddDrawingActivity extends AppCompatActivity {
 		return true;
 	}
 
-	private byte[] getbytesFromBitmap() {
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		bitmap.compress(Bitmap.CompressFormat.JPEG, 50, stream);
-		byte[] byteArray = stream.toByteArray();
-		bitmap.recycle();
-		return byteArray;
-	}
-
 	private static class insertDrawing extends AsyncTask<Void, Void, Void> {
 
-		byte[] bytes;
 		String title;
 		String currentDate;
 		String time;
 		ArrayList<MapPin> mapPinArrayList;
 		Mydao mydao;
+		String imgUrl;
 		@SuppressLint("StaticFieldLeak")
 		AddDrawingActivity context;
 
-		public insertDrawing(AddDrawingActivity addDrawingActivity, Mydao maydao, byte[] bytes, String title, String currentDate, String time, ArrayList<MapPin> mapPinArrayList) {
+		public insertDrawing(AddDrawingActivity addDrawingActivity, Mydao maydao, String imgUrl, String title, String currentDate, String time, ArrayList<MapPin> mapPinArrayList) {
 			context = addDrawingActivity;
+			this.imgUrl = imgUrl;
 			this.mydao = maydao;
-			this.bytes = bytes;
 			this.title = title;
 			this.currentDate = currentDate;
 			this.time = time;
@@ -286,7 +283,7 @@ public class AddDrawingActivity extends AppCompatActivity {
 
 		@Override
 		protected Void doInBackground(Void... voids) {
-			Drawing drawing = new Drawing(bytes, title, currentDate, time, mapPinArrayList.size());
+			Drawing drawing = new Drawing(imgUrl, title, currentDate, time, mapPinArrayList.size());
 
 			long drawingId = mydao.addDrawing(drawing);
 

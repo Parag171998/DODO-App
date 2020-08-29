@@ -3,7 +3,6 @@ package com.example.doda.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,8 +10,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.doda.activities.DrawingDetailsAvtivity;
 import com.example.doda.R;
 import com.example.doda.model.Drawing;
@@ -42,9 +45,12 @@ public class DrawingAdapter extends RecyclerView.Adapter<DrawingAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        Bitmap bitmap = BitmapFactory.decodeByteArray(drawingList.get(position).getBytes(), 0, drawingList.get(position).getBytes().length);
-
-        holder.drawingImg.setImageBitmap(bitmap);
+        Glide.with(layoutInflater.getContext()).asBitmap().load(drawingList.get(position).getImgUrl()).into(new SimpleTarget<Bitmap>() {
+            @Override
+            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                holder.drawingImg.setImageBitmap(resource);
+            }
+        });
         holder.drawingTitle.setText(drawingList.get(position).getName());
     }
 
@@ -66,7 +72,7 @@ public class DrawingAdapter extends RecyclerView.Adapter<DrawingAdapter.ViewHold
 
             itemView.setOnClickListener(view -> {
                 Intent intent = new Intent(layoutInflater.getContext(), DrawingDetailsAvtivity.class);
-                intent.putExtra("byteArray", drawingList.get(getAdapterPosition()).getBytes());
+                intent.putExtra("imhUrl", drawingList.get(getAdapterPosition()).getImgUrl());
                 intent.putExtra("title", drawingList.get(getAdapterPosition()).getName());
                 intent.putExtra("id", drawingList.get(getAdapterPosition()).getId());
                 intent.putExtra("date", drawingList.get(getAdapterPosition()).getDate());

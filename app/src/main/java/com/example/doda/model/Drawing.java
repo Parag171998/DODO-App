@@ -19,6 +19,16 @@ public class Drawing {
 	int totalMarkers;
 	@ColumnInfo
 	byte[] bytes;
+	@ColumnInfo
+	String imgUrl;
+
+	public String getImgUrl() {
+		return imgUrl;
+	}
+
+	public void setImgUrl(String imgUrl) {
+		this.imgUrl = imgUrl;
+	}
 
 	public byte[] getBytes() {
 		return bytes;
@@ -68,8 +78,8 @@ public class Drawing {
 		this.totalMarkers = totalMarkers;
 	}
 
-	public Drawing(byte[] bytes, String name, String date, String time, int totalMarkers) {
-		this.bytes = bytes;
+	public Drawing(String imgUrl,String name, String date, String time, int totalMarkers) {
+		this.imgUrl = imgUrl;
 		this.name = name;
 		this.date = date;
 		this.time = time;
