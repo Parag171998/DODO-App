@@ -3,6 +3,7 @@ package com.example.doda.activities;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -11,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.view.GestureDetector;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.widget.Button;
 import android.widget.TextView;
@@ -26,6 +28,7 @@ import com.example.doda.util.PinView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -52,14 +55,15 @@ public class DrawingDetailsAvtivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_drawing_details_avtivity);
 		ButterKnife.bind(this);
-		getSupportActionBar().hide();
+
+		Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+		setTitle("Drawing details");
 
 		Intent intent = getIntent();
 
 		init(intent);
 
 	}
-
 	@SuppressLint({"ClickableViewAccessibility", "SetTextI18n"})
 	private void init(Intent intent) {
 		title.setText(intent.getStringExtra("title"));
@@ -70,7 +74,6 @@ public class DrawingDetailsAvtivity extends AppCompatActivity {
 				@Override
 				public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
 					pinView.setImage(ImageSource.bitmap(resource));
-
 				}
 			});
 			date.setText("Created at: " + intent.getStringExtra("date"));

@@ -52,8 +52,6 @@ public class AddDrawingActivity extends AppCompatActivity {
 	PinView pinView;
 	@BindView((R.id.txt_title))
 	EditText title;
-	@BindView(R.id.btn_add_pin)
-	Button addPin;
 
 	String currentTime;
 	Date date;
@@ -125,6 +123,7 @@ public class AddDrawingActivity extends AppCompatActivity {
 					x = sCoord.x;
 					y = sCoord.y;
 					isMarkerSaved = false;
+					showDialogBar();
 				}
 				return true;
 			}
@@ -145,9 +144,9 @@ public class AddDrawingActivity extends AppCompatActivity {
 		LayoutInflater inflater = this.getLayoutInflater();
 		View dialogView = inflater.inflate(R.layout.custom_dialog_layout, null);
 		final EditText name = dialogView.findViewById(R.id.txt_person_name);
-		final EditText message = (EditText) dialogView.findViewById(R.id.edt_comment);
-		Button btnSubmit = (Button) dialogView.findViewById(R.id.buttonSubmit);
-		Button btnCancel = (Button) dialogView.findViewById(R.id.buttonCancel);
+		final EditText message = dialogView.findViewById(R.id.edt_comment);
+		Button btnSubmit = dialogView.findViewById(R.id.buttonSubmit);
+		Button btnCancel = dialogView.findViewById(R.id.buttonCancel);
 
 		btnCancel.setOnClickListener(view -> {
 			pinView.setPin(null);
@@ -170,6 +169,7 @@ public class AddDrawingActivity extends AppCompatActivity {
 					x = 0;
 					y = 0;
 					isMarkerSaved = true;
+					Toast.makeText(this, "Marker Added", Toast.LENGTH_SHORT).show();
 				}
 
 				dialogBuilder.dismiss();
@@ -209,15 +209,6 @@ public class AddDrawingActivity extends AppCompatActivity {
 			} else if (resultCode == Activity.RESULT_CANCELED) {
 				Toast.makeText(this, "Canceled", Toast.LENGTH_SHORT).show();
 			}
-		}
-	}
-
-	@OnClick(R.id.btn_add_pin)
-	public void addPin(View view) {
-		if (x != 0 && y != 0) {
-			showDialogBar();
-		} else {
-			Toast.makeText(this, "Please add a new marker", Toast.LENGTH_SHORT).show();
 		}
 	}
 

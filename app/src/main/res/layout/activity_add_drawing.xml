@@ -31,24 +31,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
-        android:orientation="horizontal"
-        android:weightSum="2">
+        android:orientation="vertical"
+        android:weightSum="1">
 
         <Button
             android:id="@+id/btn_save_drawing"
-            android:layout_width="0dp"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:layout_weight="1"
+            android:layout_gravity="center_horizontal"
             android:text="Save Drawing"
             tools:ignore="NestedWeights" />
 
-        <Button
-            android:id="@+id/btn_add_pin"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Save Pin" />
     </LinearLayout>
 
 </LinearLayout>
